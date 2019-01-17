@@ -1,0 +1,1440 @@
+//{
+//A game about redeeming your soul by taking others, in either story or 1v1
+// Main character design
+// Screens (main)
+// story is on standby until 1v1 mode is finished
+
+//v.1.3 January 4th 2019 Brett
+//}Game Explaination
+//{
+var laserX = 200;
+var laserY = 0;
+var punch = false;
+var punch2 = false;
+var soulX;
+var soulY;
+var deathtime = false;
+var moveX = false;
+var moveY = false;
+var moveX2 = false;
+var moveY2 = false;
+var armX2 = 200;
+var armY2 = 200;
+var wallX = 0;
+var wallX2 = 400;
+var deathTimer = 0;
+var charFloor2 = 200;
+var SPEED = 5;// the speed each character is set to.
+var speedX = 0;
+var speedY = 0;
+var speedX2 = 0;
+var speedY2 = 0;
+var lowSpeed = 10;
+var highSpeed = lowSpeed + 5;
+var circleXs = [];
+var circleYs = [];
+var circleSpeeds = [];
+var numCircles = 5;
+var randomChar = 0;
+var randomMap = 0;
+var canJump2 = false;
+var charVerticalSpeed = 0;
+var gravity = 2.2;
+var canJump = true;
+var jumpSpeed = -10;
+var charFloor = 200;
+var charX2 = 200;
+var charY2 = 200;
+var charSize2 = 100;
+var maxHealth = 50;
+var tutX = 300;
+var tutY = 250;
+var size = 100;
+var hatX = 0;
+var hatY = 0;
+var crit = 0;
+var path = 0;
+var timer1 = 0;
+var timer2 = 0;
+var timer3 = 0;
+var timer4 = 0;
+var timer5 = 0;
+var timer6 = 0;
+var timer7 = 0;
+var timer8 = 0;
+var timer_1 = 0;
+var timer_2 = 0;
+var timer_3 = 0;
+var timer_4 = 0;
+var timer_5 = 0;
+var timer_6 = 0;
+var timer_7 = 0;
+var speed = 3;
+var gameState = 0;
+var walkX = 200;
+var charSize = 100;
+var charX = 200;
+var charY = 200;
+var armX = charX + size * 0.2;
+var armY = charY;
+var consume = 180;
+var consume2 = 180;
+var Joey = {
+	consume: 55,
+	health: 100
+
+};
+var Stage = "Undefined";
+armX2 = charX2 - 35;
+  armY2 = charY2;
+//} Variables
+//{
+
+var drawFall = function(xFall, yFall, sizeFall) {
+	fill(255, 68, 0, random(150, 205));
+	beginShape(); //flame
+	vertex(xFall - sizeFall * 0.50, yFall);
+	vertex(xFall - sizeFall * 0.50, yFall - sizeFall * 0.18); //start of flame
+	vertex(random(xFall - sizeFall * 0.64, xFall - sizeFall * 0.44), random(yFall - sizeFall * 1.12, yFall - sizeFall * 1.32));
+	vertex(xFall - sizeFall * 0.44, yFall - sizeFall * 0.94); //dont change (divot)
+	vertex(random(xFall - sizeFall * 0.45, xFall - sizeFall * 0.25), random(yFall - sizeFall * 1.69, yFall - sizeFall * 1.89));
+	vertex(random(xFall - sizeFall * 0.35, xFall - sizeFall * 0.15), random(yFall - sizeFall * 1.59, yFall - sizeFall * 1.79));
+	vertex(random(xFall - sizeFall * 0.15, xFall + sizeFall * 0.15), random(yFall - sizeFall * 1.80, yFall - sizeFall * 2.10)); //middle of flame
+	vertex(random(xFall - sizeFall * 0.10, xFall + sizeFall * 0.10), random(yFall - sizeFall * 1.59, yFall - sizeFall * 1.79));
+	vertex(random(xFall + sizeFall * 0.10, xFall + sizeFall * 0.30), yFall - sizeFall * 1.76);
+	vertex(xFall + sizeFall * 0.39, yFall - sizeFall * 0.94); //dont change (also divot)
+	vertex(random(xFall + sizeFall * 0.60, xFall + sizeFall * 0.40), random(yFall - sizeFall * 1.10, yFall - sizeFall * 1.30)); // end of flame
+	vertex(xFall + sizeFall * 0.50, yFall);
+	endShape();
+	fill(117, 72, 56);
+	ellipse(xFall, yFall, sizeFall * 1.00, sizeFall * 1.00);
+	fill(115, 67, 25); //actual rock 
+	ellipse(xFall - sizeFall * 0.10, yFall + sizeFall * 0.10, sizeFall * 0.25, sizeFall * 0.25);
+	ellipse(xFall + sizeFall * 0.44, yFall + sizeFall * 0.02, sizeFall * 0.10, sizeFall * 0.25);
+	ellipse(xFall, yFall - sizeFall * 0.46, sizeFall * 0.30, sizeFall * 0.10);
+	ellipse(xFall + sizeFall * 0.21, yFall - sizeFall * 0.20, sizeFall * 0.25, sizeFall * 0.25);
+
+}; //draw falling objects
+var DetectOverlap = function(xpos1, ypos1, s1, xpos2, ypos2, s2) {
+	var distance = dist(xpos1, ypos1, xpos2, ypos2);
+	var radSum = (s1 + s2) / 2;
+	return radSum > distance;
+};
+var Player = function(health, character, special) {
+	this.character = character;
+	this.health = health;
+	this.special = special;
+};
+var playerOne = function(health, character, special, crit, block, dead) {
+	Player.call(health, character, special);
+	this.crit = crit;
+	this.block = false;
+	this.dead = false;
+	playerOne.prototype = Object.create(Player.prototype);
+};
+var gnomusPlayer = function(health, character, special, crit, block, dead, hatX, hatY, toss) {
+	playerOne.call(health, character, special, crit, block, dead);
+	this.hatX = hatX;
+	this.hatY = hatY;
+	this.toss = true;
+	gnomusPlayer.prototype = Object.create(playerOne.prototype);
+
+};
+var Dragonus = function(health, character, special, crit, block, dead, fireX, breath) {
+	playerOne.call(health, character, special, crit, block, dead);
+	this.fireX = fireX;
+	this.breath = true;
+	Dragonus.prototype = Object.create(playerOne.prototype);
+};
+var playerTwo = function(health, character, special, crit, block, dead) {
+	Player.call(health, character, special);
+	this.crit = crit;
+	this.block = false;
+	this.dead = false;
+
+	playerTwo.prototype = Object.create(Player.prototype);
+};
+
+var Eggy = function(health, character, special, crit, block, dead, eggX, eggY, crack) {
+	playerTwo.call(health, character, special, crit, block, dead);
+	this.eggX = eggX;
+	this.eggY = eggY;
+	this.crack = crack;
+	Eggy.prototype = Object.create(playerTwo.prototype);
+};
+
+var Slither = function(health, character, special, crit, block, dead, headX, headY) {
+	playerTwo.call(health, character, special, crit, block, dead);
+	this.headX = headX;
+	this.headY = headY;
+	Slither.prototype = Object.create(playerTwo.prototype);
+};
+var KingHammer = function(health, character, special, crit, block, dead, hammerX, hammerY) {
+	playerTwo.call(health, character, special, crit, block, dead);
+	this.hammerX = hammerX;
+	this.hammerY = hammerY;
+	KingHammer.prototype = Object.create(playerTwo.prototype);
+};
+var deathmatch = function() {
+  deathTimer++;
+  if (deathTimer > 1500 || deathtime) {
+    wallX++;
+    wallX2--;
+    fill(255,0,100);
+  rect(wallX,0,15,height);
+  rect(wallX2,0,15,height);
+    textSize(50);
+    strokeWeight(25);
+    fill(0,0,0);
+    text("Deathmatch!",90,100);
+    textSize(20);
+    
+    if (charX > wallX2 || charX < wallX) {
+      playerOne.health-= 0.5;
+    }
+    if (charX2 > wallX2 || charX2 < wallX) {
+      playerTwo.health-= 0.5;
+    }
+  }
+ 
+  if (keyIsPressed) {
+   if (key === "j") {
+    deathtime = true; 
+   }
+  }
+}
+var createJoey = function(x, y, consume, walkX, walkY, size, armX, armY) {
+	noStroke();
+	fill(10, 5, 59); //face
+	rect(x, y, size * 0.49, size * 0.43);
+	rect(x - size * 0.20, y + size * 0.20, size * 0.58, size * 0.8); //chest
+	strokeWeight(5);
+	rect(x + size * 0.20, y + size * 0.48, size * 0.25, size * 0.40); //arms
+	rect(x - size * 0.18, y + size * 0.81, size * 0.25, size * 0.52); //legs
+	rect(x + size * 0.10, y + size * 0.81, size * 0.25, size * 0.52);
+	fill(99, 246, consume); //his soul being consumed
+	rect(x + size * 0.30, y + size * 0.10, size * 0.10, size * 0.10);
+	if (gameState < 0) {
+    tutX = 1000;
+    tutY = 1000;
+  } else {
+   tutX = 200;
+    tutY = 200;
+  }
+  if (keyIsPressed) {
+     
+
+		if (key === 'f' || punch) {
+      punch = true
+			fill(100,15,255);
+			rect(armX,armY,25,10);	
+     
+
+      fill(0, 255, Joey.consume);
+				rect(x + size * 0.8, y + size * 0.46, size * 0.25, size * 0.25);
+				if (DetectOverlap(tutX + 25, tutY + 38, 80, armX + 50, armY + 5, 25) || DetectOverlap(charX2+100, charY2+50, 75, armX, armY, 75)) {
+					
+					playerTwo.health -= (1 + (consume * 0.005)); // p2 takes more damage depending on p1 having damage boosts or not
+				}
+			
+		}
+		
+	}
+
+
+}; //draws main character
+KingHammer.prototype.create = function(x, y, size, armX2, armY2) {
+	fill(56, 0, 120);
+	rect(x - size * 0.2, y - size * 0.6, size * 0.7, size * 0.7);
+	rect(x - size * 0.2, y, size * 0.3, size * 0.6);
+	rect(x - size * -0.21, y, size * 0.3, size * 0.6);
+	rect(x - size * 0.14, y - size * 1.1, size * 0.6, size * 0.5);
+	fill(0, 0, 143);
+	rect(x - size * 0.2, y, size * 0.7, size * 0.25);
+	rect(x - size * 0.2, y - size * 0.6, size * 0.25, size * 0.25);
+	rect(x - size * 0.1, y - size * 0.5, size * 0.25, size * 0.25);
+	rect(x, y - size * 0.4, size * 0.25, size * 0.25);
+	rect(x + size * 0.1, y - size * 0.3, size * 0.25, size * 0.25);
+	rect(x + size * 0.2, y - size * 0.2, size * 0.25, size * 0.25);
+	rect(x + size * 0.3, y - size * 0.1, size * 0.25, size * 0.25);
+	fill(0, 255, 255);
+	rect(x - size * 0.14, y - size * 1.0, size * 0.4, size * 0.1);
+	fill(56, 0, 120);
+	rect(x - size * 0.47, y - size * 0.3, size * 0.7, size * 0.1);
+	if (keyIsPressed) {
+
+  if (key === '0' || punch2) {
+			punch2 = true;
+			fill(0, 205, 255);
+			rect(armX2, armY2, size * 0.8, size * 0.25);
+			fill(0, 255, 255);
+			rect(armX2 , armY2, size * 0.25, size * 0.25);
+			if ( DetectOverlap(charX-100, charY+50, 75, armX2, armY2, 75)) {
+
+				playerOne.health -= (1 + (consume2 * 0.005)); // p2 takes more damage depending on p1 having damage boosts or not
+			}
+		}
+  }
+};
+Slither.prototype.create = function(x, y, size, armX2 , armY2) {
+	fill(0, 148, 84);
+	rect(x + size * -0.3, y - size * 0.2, size * 0.83, size * 0.45);
+	rect(x, y, size * 0.6, size * 0.9);
+	rect(x - size * 0.4, y + size * 0.4, size * 0.6, size * 0.1);
+	rect(x - size * 0.08, y + size * 0.6, size * 0.1, size * 0.6);
+	rect(x - size * -0.56, y + size * 0.6, size * 0.1, size * 0.6);
+	fill(153, 0, 0);
+	rect(x - size * 0.1, y - size * 0.1, size * 0.2, size * 0.2);
+  if (keyIsPressed) {
+  
+  if (key === '0' || punch2) {
+			punch2 = true;
+			fill(0, 255, 125);
+			rect(armX2, armY2, size * 0.8, size * 0.25);
+			fill(0, 255, 55);
+			rect(armX2 , armY2, size * 0.25, size * 0.25);
+			if ( DetectOverlap(charX-100, charY+50, 75, armX2, armY2, 75)) {
+
+				playerOne.health -= (1 + (consume2 * 0.005)); // p2 takes more damage depending on p1 having damage boosts or not
+			}
+		}
+  }
+};
+Eggy.prototype.create = function(x, y, size, armX2, armY2) {
+	noStroke();
+	fill(255, 255, 255);
+	rect(x - size * 0.1, y - size * 0.25, size * 0.6, size * 0.7);
+	rect(x - size * 0.01, y - size * 0.5, size * 0.4, size * 1.3);
+	fill(0, 0, 0);
+	rect(x - size * 0.16, y + size * 0.7, size * 0.3, size * 0.1);
+	rect(x - size * -0.25, y + size * 0.7, size * 0.3, size * 0.1);
+	rect(x, y - size * 0.1, size * 0.4, size * 0.4);
+	fill(255, 255, 255);
+	rect(x + size * 0.075, y - size * 0.015, size * 0.25, size * 0.25);
+  
+	if (keyIsPressed) {
+  
+  if (key === '0' || punch2) {
+			punch2 = true;
+			fill(255, 255, 255);
+			rect(armX2, armY2, size * 0.8, size * 0.25);
+			fill(0, 0, 0);
+			rect(armX2 , armY2, size * 0.25, size * 0.25);
+			if ( DetectOverlap(charX-100, charY+50, 75, armX2, armY2, 75)) {
+
+				playerOne.health -= (1 + (consume2 * 0.005)); // p2 takes more damage depending on p1 having damage boosts or not
+			}
+		}
+  }
+};
+Eggy.prototype.crack = function(crack, eggX, eggY, x, y, direct) {
+	if (crack === true) {
+		if (key.toString() === "F" || key.toString() === "f") {
+			fill(255, 255, 0);
+			eggX.push(x);
+			eggX.push(x);
+			eggY.push(y);
+			for (var i = 0; crack === false; i++) {
+				rect[i](eggX[i], eggY[i], 25, 25);
+				direct[i] = round(random(1, 2));
+				if (direct[i] === 1) {
+					eggX[i]++;
+					if (eggX[i] > 400) {
+						Eggy.prototype.special = false;
+					}
+				} else if (direct[i] === 2) {
+					eggX[i]--;
+					if (eggX[i] < 400) {
+						Eggy.prototype.special = false;
+					}
+				}
+
+			}
+		}
+	}
+};
+gnomusPlayer.prototype.create = function(x, y, size, hatX, hatY, armX, armY) {
+	hatX = x;
+	hatY = y - size * 0.25;
+	fill(255, 128, 0);
+	rect(x + size * 0.1, y - size * 0.5, size * 0.50, size * 0.50);
+	fill(255, 0, 0);
+	beginShape();
+	vertex(hatX + size * 0.38, hatY + size * -0.23);
+	vertex(hatX - size * -0.10, hatY + size * 0.01);
+	vertex(hatX, hatY - size * 0.38);
+	endShape();
+	fill(74, 49, 0);
+	rect(x - size * 0.05, y + size * -0.08, size * 0.76, size * 0.7);
+	rect(x - size * 0.05, y + size * 0.5, size * 0.1, size * 0.5);
+	rect(x - size * -0.10, y + size * 0.5, size * 0.1, size * 0.5);
+	rect(x - size * -0.26, y + size * 0.5, size * 0.1, size * 0.5);
+	rect(x - size * -0.46, y + size * 0.5, size * 0.1, size * 0.5);
+	rect(x - size * -0.60, y + size * 0.5, size * 0.1, size * 0.5);
+	fill(255, 230, 0);
+	rect(x + size * 0.34, y + size * -0.39, size * 0.15, size * 0.15);
+	if (keyIsPressed) {
+  
+  if (key === 'f' || punch) {
+			punch = true;
+			fill(148, 84, 0);
+			rect(armX, armY, size * 0.8, size * 0.25);
+			fill(189, 0, 0);
+			rect(armX + 30, armY, size * 0.25, size * 0.25);
+			if ( DetectOverlap(charX2+100, charY2+50, 75, armX, armY, 75)) {
+
+				playerTwo.health -= (1 + (consume * 0.005)); // p2 takes more damage depending on p1 having damage boosts or not
+			}
+		}
+  }
+
+};
+gnomusPlayer.prototype.throw = function(x) {
+	if (gameState === -4 && gnomusPlayer.character === "Gnomus") {
+		if (keyIsPressed) {
+			if (key.toString() === "a" || key.toString() === "A") {
+				hatX--;
+				if (hatX < x - 50) {
+					hatX += 2;
+					if (hatX === x) {
+						hatX = x;
+					}
+
+				}
+			} else if (key.toString() === "d" || key.toString() === "D") {
+
+			}
+		}
+	}
+};
+Dragonus.prototype.create = function(x, y, size, fireX, armX,armY) {
+	fill(91, 0, 194);
+	rect(x + size * 0.1, y - size * 0.5, size * 0.5, size * 0.3);
+	rect(x + size * 0.1, y - size * 0.1, size * 0.5, size * 0.3);
+	rect(x - size * 0.1, y - size * 0.5, size * 0.2, size * 0.7);
+	rect(x - size * 0.25, y - size * -0.2, size * 0.25, size * 1);
+	rect(x - size * 0.42, y - size * 0.1, size * 0.59, size * 1);
+	rect(x - size * 0.25, y - size * 0.3, size * 0.25, size * 1);
+	rect(x + size * 0.1, y - size * -0.49, size * 0.30, size * 0.24);
+	rect(x - size * -0.07, y - size * 0.3, size * 0.25, size * 1.5);
+	fill(140, 0, 0);
+	rect(x + size * 0.32, y - size * 0.40, size * 0.125, size * 0.125);
+	rect(x + size * 0.50, y - size * 0.40, size * 0.125, size * 0.125);
+  if (keyIsPressed) {
+  
+  if (key === 'f' || punch) {
+		punch = true;
+			fill(48, 84, 255);
+			rect(armX-110, armY+30, size * 0.8, size * 0.25);
+			fill(89, 0, 100);
+			rect(armX - 80, armY+30, size * 0.25, size * 0.25);
+			if ( DetectOverlap(charX2+100, charY2+50, 75, armX-110, armY+30, 75)) {
+
+				playerTwo.health -= (1 + (consume * 0.005)); // p2 takes more damage depending on p1 having damage boosts or not
+			}
+		}
+  }
+};
+var move = function() {
+	if (keyIsPressed) {
+		if ( key === 'a') {
+			speedX = -SPEED;
+      moveX = true;
+			
+		} else if ( key === 'd') {
+			speedX = SPEED;
+			moveX = true;
+		}
+    
+		if (key === 'w' && canJump) {
+
+			
+			speedY = -SPEED;
+      charVerticalSpeed = speedY;
+			charY += charVerticalSpeed;
+			moveY = true;
+
+			canJump = false;
+
+		}
+    if (key === 'd' && canJump === false) {
+      
+      charY+= 50;
+      if (charY > charFloor) {
+		charY = charFloor;
+        if (charX2 > charX-25 || charX2 < charX+25) {
+          playerTwo.health -= 10;
+        }
+	}
+    }
+	}
+	if (charY > charFloor) {
+		charY = charFloor;
+	}
+	if (charY < charFloor) {
+		charVerticalSpeed += gravity;
+		charY += charVerticalSpeed;
+	} else {
+		canJump = true;
+		charY = charFloor;
+		charVerticalSpeed = 0;
+	}
+ 
+  charY += charVerticalSpeed;
+}; // how you move
+  keyReleased = function(){
+   
+    if (key === 'a' ||key === 'd'){
+      
+        speedX = 0;  
+      moveX = false;
+      
+    }
+     if (key === 'w' ){
+        speedY = 0; 
+       moveY = false;
+    }
+     if (keyCode === LEFT_ARROW ||keyCode === RIGHT_ARROW){
+       
+        speedX2 = 0; 
+      moveX2 = false;
+      
+    }
+     if (keyCode === UP_ARROW){
+        speedY2 = 0;   
+       moveY2 = false;
+    }
+    if (key === 'f') {
+     punch = false; 
+    }
+    if (key === '0') {
+     punch2 = false 
+    }
+};// helps control movement so both players can control at once
+var move2 = function() {
+	if (keyIsPressed) {
+		if (keyCode === LEFT_ARROW) {
+			speedX2 = -SPEED;
+			moveX2 = true;
+		}
+		if (keyCode === RIGHT_ARROW) {
+			speedX2 = SPEED;
+			moveX2 = true;
+		}
+		if (keyCode === UP_ARROW && canJump2) {
+
+
+			speedY2 = -SPEED;
+			charY2 += charVerticalSpeed;
+			moveY2 = true;		
+
+			canJump2 = false;
+
+		}
+        if (keyCode === DOWN_ARROW && canJump === false) {
+      charY+= 50;
+      if (charY > charFloor) {
+		charY = charFloor;
+        if (charX > charX2-25 || charX < charX2+25) {
+          playerOne.health -= 10;
+        }
+	}
+    }
+	}
+	if (charY2 > charFloor2) {
+		charY2 = charFloor2;
+	}
+	if (charY2 < charFloor2) {
+		charVerticalSpeed += gravity;
+		charY2 += charVerticalSpeed;
+	} else {
+		canJump2 = true;
+		charY2 = charFloor2;
+		charVerticalSpeed = 0;
+	}
+	
+};
+var drawHealth1 = function(x, y, size, health) {
+	fill(140, 140, 140);
+	rect(x - size * 1.5, y + size * 1, size * 0.5, size * 0.25);
+	fill(255, 255, 255);
+	text(playerOne.character, 64, 370);
+	fill(healthCol);
+	rect(57, 373, playerOne.health, 15);
+	if (playerOne.health < 0) {
+		playerOne.dead = true;
+	}
+	if (playerOne.dead) {
+		gameState = -7;
+	}
+};
+var drawHealth2 = function(x, y, size, health) {
+	fill(140, 140, 140);
+	rect(x - size * 1.5, y + size * 1, size * 0.5, size * 0.25);
+	fill(255, 255, 255);
+	text(playerTwo.character, 305, 370);
+	fill(healthCol2);
+	rect(302, 373, playerTwo.health, 15);
+	if (playerTwo.health < 0) {
+		playerTwo.dead = true;
+
+	}
+	if (playerTwo.dead) {
+		gameState = -6;
+	}
+};
+var drawWalker = function(x, y, size) {
+	fill(35, 0, 110);
+	rect(x, y, size * 0.7, size * 0.2);
+	rect(x + size * 0.26, y, size * 0.35, size * 0.7);
+	rect(x, y + size * 0.5, size * 0.77, size * 0.2);
+	rect(x, y + size * 0.5, size * 0.25, size * 0.5);
+	rect(x + size * 0.56, y + size * 0.5, size * 0.25, size * 0.5);
+	fill(255, 0, 0);
+	rect(x, y + size * 0.06, size * 0.4, size * 0.1);
+}; // draws basic enemy
+var drawMelinoe = function(x, y, size, health) {
+	fill(32, 0, 120);
+	rect(x, y, size * 0.5, size * 0.5);
+	rect(x + size * 0.18, y + size * 0.20, size * 0.6, size * 0.7);
+	rect(x, y + size * 0.8, size * 1, size * 0.15);
+	rect(x, y + size * 0.8, size * 0.1, size * 0.5);
+	rect(x + size * 0.2, y + size * 0.8, size * 0.1, size * 0.5);
+	rect(x + size * 0.4, y + size * 0.8, size * 0.1, size * 0.5);
+	rect(x + size * 0.6, y + size * 0.8, size * 0.1, size * 0.5);
+	rect(x + size * 0.8, y + size * 0.8, size * 0.1, size * 0.5);
+	rect(x + size, y + size * 0.8, size * 0.1, size * 0.5);
+	fill(255, 51, 0);
+	rect(x + size * 0.1, y + size * 0.1, size * 0.3, size * 0.3);
+	fill(32, 0, 120);
+	rect(x + size * 0.15, y + size * 0.15, size * 0.2, size * 0.2);
+	fill(196, 0, 255);
+	rect(x + size * 0.175, y + size * 0.175, size * 0.14, size * 0.14);
+ 
+}; // draws stronger enemy
+var drawItem = function(item) {
+	fill(156, 156, 156);
+	textSize(30);
+	text("You have found:\n" + item, 29, 43);
+}; // story item
+
+//}functions
+function setup() {
+	createCanvas(400, 400);
+
+	for (var current = 0; current < numCircles; current++) {
+		circleXs.push(random(-10, width + 10));
+		circleYs.push(random(-500, -50));
+		circleSpeeds.push(random(lowSpeed, highSpeed));
+	}
+   soulX = random(100,300);
+ soulY = random(150,200);
+	var lowHealth = color(255, 0, 0);
+	var highHealth = color(0, 255, 0);
+	var healthCol = lerpColor(highHealth, lowHealth, playerOne.health / maxHealth);
+	var healthCol2 = lerpColor(highHealth, lowHealth, playerTwo.health / maxHealth);
+  wallX = 0;
+  wallX2 = 400;
+}
+var drawSoul = function() {
+  fill(0,255,255);
+  rect(soulX,soulY,15,15);
+  if (DetectOverlap(soulX,soulY,15,charX,charY,75)) {
+      consume += 5;
+    soulX = random(100,300);
+    soulY = random(150,200);
+      } else if (DetectOverlap(soulX,soulY,15,charX2,charY2,75)) {
+        consume2 += 5;
+    soulX = random(100,300);
+    soulY = random(150,200);
+      }
+    fill(0,255,255);
+  rect(soulX,soulY,15,15);
+}
+
+function draw() {
+
+	var lowHealth = color(255, 0, 0);
+	var highHealth = color(0, 255, 0);
+	healthCol = lerpColor(lowHealth, highHealth, playerOne.health / maxHealth);
+	healthCol2 = lerpColor(lowHealth, highHealth, playerTwo.health / maxHealth); // updates the health for each character
+  armX = charX + 10;
+  armY = charY;
+	if (gameState === 0) {
+		background(107, 0, 173);
+		fill(0, 17, 92);
+		push();
+		rotate(20);
+		rect(21, 181, 598, 100);
+		pop();
+		fill(34, 0, 120);
+		rect(60, 324, 179, 200);
+		fill(46, 0, 125);
+		rect(46, 250, 100, 200);
+		fill(56, 0, 115);
+		rect(0, 200, 100, 200);
+		createJoey(168, 277, 25, 200, 0, 46);
+		fill(238, 255, 0);
+		rect(21, 224, 20, 20);
+		rect(60, 224, 20, 20);
+		rect(21, 263, 20, 20);
+		rect(60, 263, 20, 20);
+		rect(21, 305, 20, 20);
+		rect(60, 305, 20, 20);
+		rect(105, 267, 20, 20);
+		rect(105, 308, 20, 20);
+		rect(21, 348, 20, 20);
+		rect(60, 348, 20, 20);
+		rect(105, 351, 20, 20);
+		fill(50, 0, 150);
+		fill(0, 255, 77);
+		textSize(70);
+		text("Soul", 69, 100);
+		fill(0, 128, 255);
+		text("Thief", 183, 100);
+		fill(20, 0, 107);
+		rect(127, 144, 150, 100);
+		rect(127, 290, 150, 100);
+		fill(128, 0, 255);
+		rect(138, 153, 130, 80);
+		rect(138, 299, 130, 80);
+		fill(63, 0, 135);
+		textSize(36);
+		text("Rumble", 144, 352);
+		textSize(34);
+		text("Tutorial", 144, 210);
+		fill(52, 0, 135);
+		rect(300, 200, 100, 200);
+		fill(238, 255, 0);
+		rect(317, 228, 20, 20);
+		rect(360, 228, 20, 20);
+		rect(317, 268, 20, 20);
+		rect(317, 312, 20, 20);
+		rect(317, 354, 20, 20);
+		rect(360, 268, 20, 20);
+		rect(360, 312, 20, 20);
+		rect(360, 354, 20, 20);
+		if (mouseIsPressed && mouseX > 138 && mouseX < 268 && mouseY > 299 && mouseY < 380) {
+			gameState = -1;
+		}
+		if (mouseIsPressed && mouseX > 138 && mouseX < 268 && mouseY > 153 && mouseY < 233) {
+			gameState = 1;
+		}
+	} // beggining 
+	//{
+	if (gameState === 1) {
+
+		background(0, 230, 255);
+		fill(0, 176, 12);
+		rect(0, 300, width, 100);
+		fill(255, 255, 255);
+		textSize(15);
+		text("Jessica: That's it! I can't be with some common criminal!\nCome Daniel, we're leaving now! You: No, please.. I can\n change! (Click to continue) ", 16, 338);
+
+		//if
+
+		
+			timer1++;
+			if (timer1 > 100) {
+				if (mouseIsPressed) {
+					gameState = 2;
+				}
+			}
+
+		
+		//draw
+		createJoey(299, 200, 55, walkX, 0, charSize);
+		createJoey(125, 200, 55, walkX, 0, charSize);
+		createJoey(181, 249, 41, walkX, 0, 50);
+		charSize = 89;
+	} //story
+	if (gameState === 2) {
+		background(0, 230, 255);
+		fill(0, 176, 12);
+		rect(0, 300, width, 100);
+		createJoey(59, 230, 55, 200, 0, 75);
+		drawWalker(322, 229, 100);
+		drawMelinoe(200, 200, 100);
+		push();
+		rotate(-50);
+		createJoey(-23, 347, 55, 200, 0, 35);
+		rotate(-40);
+		createJoey(-383, 18, consume, 200, 0, 75);
+		fill(32, 0, 120);
+		pop();
+		rect(200, 300, 10, 30);
+		fill(102, 0, 0);
+		rect(195, 320, 20, 10);
+		text("???:Our time has come, and you finally got\n what you deserved.", 10, 360);
+		fill(255, 255, 255);
+		text("You:Wha.. Jessica, Danny, NO!", 145, 376);
+		consume++;
+		
+
+			timer2++;
+			if (timer2 > 100) {
+				if (mouseIsPressed) {
+					gameState = 3;
+				}
+			}
+		
+	}
+	if (gameState === 3) {
+		background(0, 0, 0);
+		fill(255, 255, 255);
+		textSize(30);
+		text("6 Months Later...", 102, 200);
+		
+
+			timer3++;
+			if (timer3 > 100) {
+				if (mouseIsPressed) {
+					gameState = 4;
+				}
+			}
+		
+	}
+	if (gameState === 4) {
+		playerOne.character = "Joey";
+		playerOne.health = 50;
+		playerTwo.character = "Gh0st";
+		playerTwo.health = 50;
+		background(61, 0, 130); // scenery
+		fill(53, 0, 99);
+		rect(0, 200, 100, 200);
+		rect(120, 235, 50, 100);
+		rect(200, 89, 150, 300);
+		fill(255, 255, 0);
+		rect(10, 217, 25, 25);
+		rect(10, 270, 25, 25);
+		rect(57, 217, 25, 25);
+		rect(57, 270, 25, 25);
+		rect(132, 248, 25, 25);
+		rect(219, 104, 25, 25);
+		rect(305, 104, 25, 25);
+		rect(262, 104, 25, 25);
+		rect(219, 151, 25, 25);
+		rect(262, 151, 25, 25);
+		rect(305, 151, 25, 25);
+		rect(305, 197, 25, 25);
+		rect(262, 197, 25, 25);
+		rect(219, 197, 25, 25);
+		rect(305, 241, 25, 25);
+		rect(219, 241, 25, 25);
+		rect(262, 241, 25, 25);
+		fill(0, 0, 0);
+		rect(0, 295, width, 5);
+		rect(0, 0, 5, height);
+		rect(0, 0, width, 5);
+		rect(395, 0, 5, height);
+		fill(36, 0, 120);
+		rect(0, 300, width, 100);
+		fill(19, 0, 143);
+		rect(6, 287, 69, 75);
+		fill(74, 0, 148);
+		rect(10, 294, 23, 10);
+		rect(44, 294, 23, 10);
+		beginShape();
+		vertex(6, 361);
+		vertex(6, 310);
+		vertex(78, 325);
+		vertex(79, 369);
+		endShape();
+		fill(102, 0, 191);
+		rect(132, 325, width, 51);
+		fill(255, 255, 255);
+		textSize(15);
+		text("*Knock Knock*", 269, 303);
+    
+		move();
+    
+    charX += speedX;
+    charY += speedY;
+    charX2 += speedX2;
+    charY2 += speedY2;
+		createJoey(charX, charY + 100, consume, 200, 0, 50, charX, charY + 123);
+			
+		if (charX > 400) {
+			charX = 75;
+			gameState = 70704121;
+		} 
+		if (charX < 0) {
+			charX = 0;
+		}
+		if (charX < 76) {
+			fill(128, 128, 128);
+			ellipse(38, 302, 20, 20);
+			fill(0, 0, 0);
+			textSize(15);
+			text("I", 35, 306);
+		}
+		if (key.toString() === "i") {
+			Joey.gun = true;
+			drawItem("Old Gun");
+		}
+
+	} //first gameplay
+	if (gameState === 70704121) {
+		move();
+charX += speedX;
+    charY += speedY;
+    charX2 += speedX2;
+    charY2 += speedY2;
+		background(81, 0, 161);
+		fill(140, 0, 255);
+		rect(0, 300, width, 100);
+		createJoey(charX, charY + 35, 55, 200, 0, 75, charX, charY + 73);
+		fill(255, 255, 255);
+		text("Use WASD to move and Press F to attack.\n You can use specials by comboing F and WASD.\n Use this screen to practice,\n move past the ghost when you're done.", 10, 26);
+
+		rect(tutX, tutY, 50, 80);
+		fill(0, 0, 0);
+		rect(tutX + 10, tutY + 10, 10, 10);
+		rect(tutX + 27, tutY + 10, 10, 10);
+		if (charX > 400) {
+			gameState = 5;
+		}
+		if (playerTwo.health < 0) {
+			playerTwo.dead = true;
+		}
+		if (playerTwo.dead) {
+			playerTwo.health = 50;
+			playerTwo.dead = false;
+		}
+    if (keyIsPressed && key === 'b') {
+      gameState =8;
+      playerTwo.health = 200;
+    }
+		drawHealth1(237, 233, 124);
+		drawHealth2(481, 233, 124);
+
+
+
+	} //tutorial
+	if (gameState === 5) {
+		background(68, 0, 110);
+		fill(79, 24, 0);
+		rect(width / 3, 130, width / 3, 300);
+		fill(74, 0, 138);
+		ellipse(233, 274, 25, 25);
+		fill(255, 255, 255);
+		text("Open up Joey, We need to talk", 96, 350);
+		text("Make A Choice", 150, 30);
+		fill(117, 117, 117);
+		rect(75, 41, 256, 100);
+		fill(0, 0, 0);
+		ellipse(98, 58, 20, 20);
+		ellipse(98, 90, 20, 20);
+		ellipse(89, 117, 20, 20);
+		text("Open the door.", 119, 60);
+		text("Ignore the stranger.", 119, 91);
+
+
+		if (Joey.gun === true) {
+			text("Shoot the person through the door", 100, 120);
+		} else {
+			text("LOCKED", 119, 120);
+		}
+		
+
+			timer5++;
+			if (timer5 > 100) {
+				if (mouseIsPressed) {
+					gameState = 6;
+				}
+			}
+		
+
+
+	} //end of tutorial
+	if (gameState === 6) {
+		background(71, 0, 171);
+		fill(143, 48, 0);
+		rect(100, 100, 25, 300);
+		fill(255, 255, 255);
+		rect(115, 100, 200, 300);
+		
+
+			timer6++;
+			if (timer6 > 100) {
+				if (mouseIsPressed) {
+					gameState = 7;
+				}
+			}
+		
+	}
+	if (gameState === 7) {
+		background(255, 255, 255);
+		fill(0, 0, 0);
+		textSize(20);
+		text("He's still in there, stuck inside his own mind.\n Constantly fighting with himself and others\n about that single day. Over and over...", 10, 322);
+		
+
+			timer7++;
+			if (timer7 > 100) {
+				if (mouseIsPressed) {
+					gameState = -1;
+				}
+			}
+		
+	}
+	if (gameState === 8) {
+   background(120,0,255);
+    fill(255,255,255);
+    textSize(18);
+    text("Just know, you brought this on yourself",50,300);
+    playerTwo.character = "Melin";
+    
+    fill(255,0,255);
+    rect(0,300,width,100);
+    createJoey(charX,charY+25,consume,75,200,75,charX,charY);
+    drawMelinoe(charX2+50,charY2-20,100,200);
+    
+    text("Just know, you brought this on yourself",50,300);
+    move();
+    charX += speedX;
+    charY += speedY;
+    charX2 += speedX2;
+    charY2 += speedY2;
+     fill(255,0,0);
+    rect(laserX,laserY,20,20);
+    laserY+= 10;
+    if (DetectOverlap(laserX,laserY,20,charX,charY,75)) {
+     playerOne.health -= 10; 
+      laserY = 0;
+      laserX = random(10,400);
+    } else if (laserY > 400) {
+     laserY = 0;
+      laserX = random(10,400); 
+    }
+    drawHealth1();
+    fill(healthCol2);
+    rect(100,10,playerTwo.health,20);
+    ellipse(charX2+100,charY2+50,100,100);
+    ellipse(armX,armY+50,25,25);
+    if (keyIsPressed && key === 'f') {
+     
+    if (DetectOverlap(armX,armY+50,25,charX2+100,charY2+50,100)) {
+     playerTwo.health -= 1; 
+     
+    }
+    }
+    if (playerTwo.health < 0) {
+     gameState = 9; 
+    }
+    if (playerTwo.health < 150) {
+     laserY+=20; 
+    }
+    if (playerTwo.health < 100) {
+     laserY += 30;
+    }
+    if (playerTwo.health < 50) {
+     laserY += 40; 
+    }
+  }
+  if (gameState === 9) {
+    background(100,100,255);
+    createJoey(100,100,70,70,70,70,70);
+    fill(255,255,255);
+    text("Wow.. i'm done, that feels good.\n Finishing a revenge arc and then\n immeadiatly having a mid-life crisis\n since I have no family left to share\n emotional experiences with.... heh",0,200);
+  	if (mouseIsPressed) {
+     gameState = -1 
+    }
+  }
+	//}Tutorial
+	//{
+	if (gameState === -1) {
+		background(75, 0, 181);
+		textSize(55);
+		fill(0, 0, 0);
+		fill(136, 0, 255);
+		rect(123, 203, 150, 100);
+		fill(0, 0, 0);
+		text("Play", 147, 274);
+		text("How To Play", 50, 50);
+		textSize(22);
+		text(" You are going to battle against\n your friend. You can do this\n by using WASD and F for player 1,\n player 2 will use arrow keys and 0.", 10, 101);
+
+
+		timer_1++;
+		if (timer_1 > 100) {
+
+			if (mouseIsPressed && mouseX > 123 && mouseX < 273 && mouseY > 203 && mouseY < 303) {
+				gameState = -2;
+			}
+		}
+
+	} //Rumble tutorial
+	if (gameState === -2) {
+		background(84, 0, 181);
+		fill(0, 0, 0);
+		textSize(50);
+		text("Player One Pick", 29, 49);
+
+		fill(200, 0, 255);
+		strokeWeight(10);
+		stroke(0, 0, 0);
+		rect(101, 349, 194, 50);
+		rect(15, 100, 100, 250);
+		rect(141, 100, 100, 250);
+		rect(266, 100, 100, 250);
+		fill(0, 0, 0);
+		textSize(38);
+    strokeWeight(0);
+		text("RANDOM", 113, 386);
+		strokeWeight(0);
+		createJoey(50, 120, 255, 200, 0, 114); //the three characters
+		gnomusPlayer.prototype.create(156, 172, 100);
+		Dragonus.prototype.create(317, 158, 100);
+		fill(0, 0, 0);
+		textSize(40);
+		text("Joey", 23, 328);
+		textSize(25);
+		text("Gnomus", 143, 328);
+		textSize(20);
+		text("Dragonus", 272, 328);
+
+
+		timer_2++;
+		if (timer_2 > 100) {
+			if (mouseIsPressed && mouseX > 101 && mouseX < 295 && mouseY > 349 && mouseY < 399) {
+				randomChar = round(random(1, 3));
+
+			}
+			if (mouseIsPressed && mouseX > 15 && mouseX < 115 && mouseY > 100 && mouseY < 350 || randomChar === 1) {
+
+				playerOne.character = "Joey";
+				gameState = -3;
+				timer = 0;
+
+			} else if (mouseIsPressed && mouseX > 141 && mouseX < 241 && mouseY > 100 && mouseY < 350 || randomChar === 2) {
+
+				playerOne.character = "Gnomus";
+				gameState = -3;
+				timer = 0;
+			} else if (mouseIsPressed && mouseX > 266 && mouseX < 366 && mouseY > 100 && mouseY < 350 || randomChar === 3) {
+
+				playerOne.character = "Dragonus";
+				gameState = -3;
+				timer = 0;
+			}
+		}
+		playerOne.health = 50;
+
+
+
+	} //Char Select
+	if (gameState === -3) {
+		background(84, 0, 181);
+		fill(0, 0, 0);
+		textSize(50);
+		text("Player Two Pick", 29, 49);
+		fill(200, 0, 255);
+		strokeWeight(10);
+		stroke(0, 0, 0);
+		rect(101, 349, 194, 50);
+		rect(15, 100, 100, 250);
+		rect(141, 100, 100, 250);
+		rect(266, 100, 100, 250);
+		strokeWeight(0);
+		Eggy.prototype.create(45, 168, 100);
+		Slither.prototype.create(175, 129, 100);
+		KingHammer.prototype.create(300, 200, 100);
+		fill(0, 0, 0);
+		textSize(40);
+		text("Eggy", 23, 328);
+		textSize(32);
+		text("Slither", 146, 328);
+		textSize(21);
+		text("   King\nHammer", 277, 313);
+		textSize(38);
+		text("RANDOM", 113, 386);
+
+
+		timer_3++;
+		if (timer_3 > 100) {
+			if (mouseIsPressed && mouseX > 101 && mouseX < 295 && mouseY > 349 && mouseY < 399) {
+				randomChar = round(random(4, 6));
+			}
+			if (mouseIsPressed && mouseX > 15 && mouseX < 115 && mouseY > 100 && mouseY < 350 || randomChar === 4) {
+
+				playerTwo.character = "Eggy";
+				gameState = -4;
+				timer = 0;
+			} else if (mouseIsPressed && mouseX > 141 && mouseX < 241 && mouseY > 100 && mouseY < 350 || randomChar === 5) {
+
+				playerTwo.character = "Slither";
+				gameState = -4;
+				timer = 0;
+			} else if (mouseIsPressed && mouseX > 266 && mouseX < 366 && mouseY > 100 && mouseY < 350 || randomChar === 6) {
+
+				playerTwo.character = "KingHammer";
+				gameState = -4;
+				timer = 0;
+			}
+		}
+		playerTwo.health = 50;
+
+	}//character selection
+	if (gameState === -4) {
+		jumpSpeed = -25;
+		background(84, 0, 181);
+		fill(0, 0, 0);
+		textSize(50);
+		text("Pick a Map", 81, 49);
+		fill(157, 0, 255);
+		strokeWeight(11);
+		stroke(0, 0, 0);
+		rect(101, 349, 194, 50);
+		rect(38, 100, 150, 150, 30);
+		rect(217, 100, 150, 150, 30);
+		fill(0, 166, 8);
+		noStroke();
+		rect(43, 196, 140, 50, 30);
+		fill(69, 29, 143);
+		rect(42, 106, 143, 100);
+		fill(0, 4, 255);
+		rect(101, 202, 20, 49, 20);
+		rect(155, 194, 29, 55, 20);
+		rect(41, 194, 29, 55, 20);
+		fill(133, 49, 0);
+		rect(84, 198, 50, 10);
+		textSize(20);
+		fill(0, 0, 0);
+		text("Cannon Islands ", 44, 274);
+		textSize(41);
+		text("RANDOM", 106, 390);
+		fill(153, 43, 0);
+		rect(224, 104, 138, 118);
+		fill(255, 72, 0);
+		rect(243, 130, 10, 10);
+		rect(272, 150, 10, 10);
+		rect(302, 112, 10, 10);
+		rect(224, 207, 33, 38, 30);
+		rect(330, 207, 33, 38, 30);
+		fill(87, 0, 0);
+		rect(244, 207, 100, 38);
+		rect(256, 195, 77, 38);
+		fill(0, 0, 0);
+		textSize(20);
+		text("The Depths", 237, 278);
+		
+
+			timer_4++;
+			if (timer_4 > 100) {
+
+				if (mouseIsPressed && mouseX > 101 && mouseX < 295 && mouseY > 349 && mouseY < 399) {
+					randomMap = round(random(1, 2));
+				}
+				if (mouseIsPressed && mouseX > 38 && mouseX < 188 && mouseY > 100 && mouseY < 250 || randomMap === 1) {
+
+					Stage = "Islands";
+          charFloor = 200;
+          charFloor2 = 200;
+          
+					gameState = -5;
+
+
+				} else if (mouseIsPressed && mouseX > 217 && mouseX < 367 && mouseY > 100 && mouseY < 250 || randomMap === 2) {
+
+					Stage = "Depths";
+          charFloor = 200;
+          charFloor2 = 200;
+           
+					gameState = -5;
+
+				}
+
+			}
+		
+	} //map select
+	if (gameState === -5) {
+     
+   
+		move();
+		move2();
+    charX += speedX;
+    charY += speedY;
+    charX2 += speedX2;
+    charY2 += speedY2;
+    drawSoul();
+		if (Stage === "Depths") {
+      armX2 = charX2+70;
+  	armY2 = charY2+35;
+      armX = charX;
+      armY = charY;
+			fill(153, 43, 0);
+			background(153, 43, 0);
+			for (var current = 0; current < circleYs.length; current++) {
+				circleYs[current] += circleSpeeds[current];
+			}
+			for (var current1 = 0; current1 < circleYs.length; current1++) {
+				if (circleYs[current1] > height) {
+					circleXs[current1] = random(floor(width));
+					circleYs[current1] = random(-450, -50);
+
+
+				}
+			}
+			for (var current2 = 0; current2 < circleYs.length; current2++) {
+				drawFall(circleXs[current2], circleYs[current2], 25);
+			}
+			fill(255, 72, 0);
+
+			rect(-3, 270, 87, 137, 30);
+			rect(323, 270, 83, 138, 30);
+			fill(87, 0, 0);
+			rect(69, 264, 273, 151);
+			
+      
+      if (charX > 390 || charX < 20) {
+        playerOne.health--;
+      }
+      if (charX2 > 475 || charX2 < -200) {
+        playerTwo.health--;
+      }
+      
+     
+
+			if (playerOne.character === "Joey") {
+         
+				createJoey(charX - 116, charY + 14, 55, 200, 0, 38, charX - 110, charY + 31);
+
+			}
+			if (playerOne.character === "Gnomus") {
+        
+				gnomusPlayer.prototype.create(charX - 117, charY + 18, 45, 200, 190, charX - 103, charY + 38);
+			}
+			if (playerOne.character === "Dragonus") {
+        
+				Dragonus.prototype.create(charX - 104, charY + 11, 44, 200, charX +5,charY-5);
+			}
+			if (playerTwo.character === "Eggy") {
+				Eggy.prototype.create(charX2 + 110, charY2 + 31, 41,charX2+85,charY2+25);
+
+			}
+			if (playerTwo.character === "Slither") {
+				Slither.prototype.create(charX2 + 111, charY2 + 11, 45,charX2+85,charY2+25);
+			}
+			if (playerTwo.character === "KingHammer") {
+				KingHammer.prototype.create(charX2 + 114, charY2 + 40, 44,charX2+85,charY2+15);
+			}
+			drawHealth1(237, 233, 124);
+			drawHealth2(481, 233, 124);
+      
+		} else if (Stage === "Islands") {
+			armX2 = charX2+65;
+  	armY2 = charY2+50;
+			background(69, 29, 143);
+			fill(0, 166, 8);
+			noStroke();
+			rect(43, 280, 326, 141, 30);
+			fill(0, 4, 255);
+			rect(190, 278, 45, 137, 20);
+			rect(0, 285, 45, 129, 20);
+			rect(361, 285, 46, 153, 20);
+			fill(133, 49, 0);
+			rect(151, 278, 131, 10);
+			rect(150, 288, 133, 10);
+			if (playerOne.character === "Joey") {
+				createJoey(charX - 116, charY + 32, 55, 200, 0, 38, charX - 110, charY + 50);
+
+			}
+			if (playerOne.character === "Gnomus") {
+				gnomusPlayer.prototype.create(charX - 118, charY + 36, 45, 200, 190, charX - 103, charY + 38);
+			}
+			if (playerOne.character === "Dragonus") {
+				Dragonus.prototype.create(charX - 108, charY + 31, 44, 200);
+			}
+			if (playerTwo.character === "Eggy") {
+				Eggy.prototype.create(charX2 + 94, charY2 + 56, 33);
+
+			}
+			if (playerTwo.character === "Slither") {
+				Slither.prototype.create(charX2 + 98, charY2 + 31, 45);
+			}
+			if (playerTwo.character === "KingHammer") {
+				KingHammer.prototype.create(charX2 + 109, charY2 + 56, 44);
+			}
+		}
+		drawHealth1(237, 233, 124);
+		drawHealth2(481, 233, 124);
+     deathmatch();
+    drawSoul();
+	} //fighting time
+	if (gameState === -6) {
+		background(145, 0, 25);
+    fill(255,0,255);
+    rect(100,100,200,100);
+    textSize(50);
+    fill(0,0,0);
+    text("Replay",125,175)
+    text(playerOne.character+" "+"Wins!",25,55);
+		playerOne.dead = false;
+    playerTwo.dead = false;
+    
+    if (mouseIsPressed && mouseX > 100 && mouseX < 300 && mouseY > 100 && mouseY < 200) {
+      timer_2 = 0;
+      timer_3 = 0;
+      timer_4 = 0;
+      timer_5 = 0;
+      charX = 200;
+      charY = 200;
+      charX2 = 200;
+      charY2 = 200;
+      deathTimer = 0;
+      wallX = 0;
+      wallX2 = 400;
+      deathtime = false;
+      consume = 180;
+      consume2 = 180;
+      punch = false;
+      punch2 = false;
+      playerOne.character = "undefined";
+      playerTwo.character = "undefined";
+      Stage = "undefined";
+      gameState = -2;
+      
+    }
+	} // Player one Wins
+	if (gameState === -7) {
+		background(145, 0, 255);
+    fill(255,0,255);
+    rect(100,100,200,100);
+    textSize(50);
+    fill(0,0,0);
+    text("Replay",125,175)
+    text(playerTwo.character+" "+"Wins!",25,55);
+		playerOne.dead = false;
+    playerTwo.dead = false;
+    
+    if (mouseIsPressed && mouseX > 100 && mouseX < 300 && mouseY > 100 && mouseY < 200) {
+       timer_2 = 0;
+      timer_3 = 0;
+      timer_4 = 0;
+      timer_5 = 0;
+     	charX = 200;
+      charY = 200;
+      charX2 = 200;
+      charY2 = 200;
+      deathTimer = 0;
+      wallX = 0;
+      wallX2 = 400;
+      deathtime = false;
+      punch = false;
+      punch2 = false;
+      consume = 180;
+      consume2 = 180;
+      playerOne.character = "undefined";
+      playerTwo.character = "undefined";
+      Stage = "Undefined";
+      gameState = -2;
+     
+    }
+		
+	} // Player two Wins
+	//}Rumble Mode
+			
+		
+	//}draw
+}
